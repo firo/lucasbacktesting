@@ -10,21 +10,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Function to simulate backtesting
-def run_backtesting(portfolio, duration, budget):
-    st.write("### Backtesting Results")
-    st.write(f"Portfolio: {', '.join(portfolio)}")
-    st.write(f"Duration: {duration} years")
-    st.write(f"Budget by stock: ${budget:,.2f}")
-
-    # Simulate charts for each stock
-    for stock in portfolio:
-        fig, ax = plt.subplots()
-        ax.plot(range(10), [i * duration for i in range(10)], label=f"Performance of {stock}")
-        ax.set_title(f"Chart for {stock}")
-        ax.legend()
-        st.pyplot(fig)
-
 # Main layout
 st.set_page_config(page_title="Luca's Strategy Backtesting")
 
@@ -300,6 +285,8 @@ def run_backtrading(stock, days, budget, take_profit_percent):
 def run(stocks, years, budget_stock, take_profit_percent):
     days = -years * 365
     tabs = st.tabs(portfolio)
+    total_yeld = 0
+    
     #for stock in stocks:
     data_chart = []
     for i, stock in enumerate(stocks):
@@ -311,6 +298,7 @@ def run(stocks, years, budget_stock, take_profit_percent):
             final_budget, logs = run_backtrading(stock, days, budget_stock, take_profit_percent)
             profit_loss = final_budget - budget
             perc_profit_loss = profit_loss / budget*100
+            total_yeld = total_yeld + profit_loss
             st.markdown(f"Completed backtesting with Initial Portfolio Value **{budget:.2f}** Final Portfolio Value **{final_budget:.2f}** and Profit/Loss **{profit_loss:.2f}** (**{perc_profit_loss:.2f}%**)")
             st.dataframe(logs, use_container_width=True)
             #print(f"Completed backtesting for: {stock} with Profit/Loss {profit_loss:.2f} \n")
@@ -319,9 +307,10 @@ def run(stocks, years, budget_stock, take_profit_percent):
     df = pd.DataFrame(data_chart)
     df.set_index('stock', inplace=True) 
     st.bar_chart(df['profit_loss'])
-    return profit_loss
+    return total_yeld, df
 # -- firo end backtrader ---
 
 # Automatically run backtesting when parameters change
 if portfolio and budget > 0:
-    run(portfolio, duration, budget, take_profit_percent)
+    bt_yeld, df = run(portfolio, duration, budget, take_profit_percent)
+    st.markdown(f"*Backtesting* yeld is **{bt_yeld:.2f}** with **{budget * len(portfolio)}** invested.")
