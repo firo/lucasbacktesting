@@ -9,10 +9,8 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     git \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
+    libfreetype6-dev \
+    libpng-dev \
     --no-install-recommends && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -22,8 +20,13 @@ WORKDIR /app
 # Clone the GitHub repository
 RUN git clone https://github.com/firo/lucasbacktesting.git .
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Install Python dependencies individually
+RUN pip3 install --no-cache-dir \
+    backtrader \
+    yfinance \
+    streamlit \
+    pandas \
+    matplotlib
 
 # Expose the Streamlit port
 EXPOSE 8502
