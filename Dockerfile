@@ -1,20 +1,35 @@
-# Aggiungi la creazione di un ambiente virtuale Python
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-WORKDIR /app
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    gcc \
+    g++ \
+    make \
+    libffi-dev \
+    libssl-dev \
+    gfortran \
+    liblapack-dev \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Clona il repository
-RUN git clone https://github.com/firo/lucasbacktesting.git .
+RUN git clone https://github.com/firo/lucasbacktesting.git /app
 
-# Installa dipendenze di sistema per creare l'ambiente virtuale
-RUN apt-get update && apt-get install -y python3-venv
+# Imposta la directory di lavoro
+WORKDIR /app
 
 # Crea e attiva un ambiente virtuale
-RUN python3 -m venv /env
-ENV PATH="/env/bin:$PATH"
+RUN python3 -m venv venv
+RUN . ./venv/bin/activate
 
-# Installa i pacchetti Python nell'ambiente virtuale
-RUN pip install --no-cache-dir backtrader yfinance streamlit pandas matplotlib
+# Aggiorna pip e installa le dipendenze
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# Comando di default per eseguire il container
-CMD ["streamlit", "run", "app.py"]
+# Espone la porta 8502
+EXPOSE 8502
+
+# Comando di default quando si esegue il container
+CMD ["streamlit", "run", "firo_ui.py"]
