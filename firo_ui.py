@@ -20,8 +20,10 @@ st.title("Welcome to the Luca's Strategy Backtesting")
 st.sidebar.header("Backtest Parameters")
 
 # Funzione per caricare i ticker da file CSV in una cartella
-@st.cache_data
 def load_tickers_from_folder(folder_path):
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
     ticker_list = []
     for filename in os.listdir(folder_path):
         if filename.endswith(".csv"):
@@ -65,6 +67,10 @@ take_profit_percent = st.sidebar.slider(
     step=1
 )
 
+# Clear cache data
+if st.sidebar.button("Clear Cache"):
+    st.cache_data.clear()
+
 # --- firo start backtrader ---
 #
 # Get Date from Yahoo Finance
@@ -107,7 +113,11 @@ def get_data_from_yahoo(stock, days):
     return data
 
 # Cache managment by stock and dates
+# @st.cache_data(persist="disk")
 def fetch_data_with_cache(stock, start_date, end_date, cache_dir="cache"):
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    
     # Converti le date in stringhe e prendi solo la parte della data (prima dell'orario)
     start_date_str = str(start_date).split(' ')[0]  # Solo la data, senza orario
     end_date_str = str(end_date).split(' ')[0]  # Solo la data, senza orario
@@ -286,7 +296,7 @@ def run(stocks, years, budget_stock, take_profit_percent):
     days = -years * 365
     tabs = st.tabs(portfolio)
     total_yeld = 0
-    
+
     #for stock in stocks:
     data_chart = []
     for i, stock in enumerate(stocks):
