@@ -20,6 +20,9 @@ RUN git clone https://github.com/firo/lucasbacktesting.git /app
 # Imposta la directory di lavoro
 WORKDIR /app
 
+# Crea directory tickers
+RUN mkdir /app/tickers
+
 # Crea e attiva un ambiente virtuale
 RUN python3 -m venv venv
 RUN . ./venv/bin/activate
